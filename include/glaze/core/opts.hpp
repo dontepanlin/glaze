@@ -20,6 +20,7 @@ namespace glz
    inline constexpr uint32_t TOML = 400;
    inline constexpr uint32_t STENCIL = 500;
    inline constexpr uint32_t MUSTACHE = 501;
+   inline constexpr uint32_t YAML = 600;
    inline constexpr uint32_t CSV = 10000;
    inline constexpr uint32_t EETF = 20000;
 
