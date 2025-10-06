@@ -7,6 +7,8 @@ FetchContent_Declare(
   GIT_SHALLOW TRUE
 )
 
+option(BUILD_NETWORKING_TEST "build networking test" OFF)
+
 message(STATUS "Fetching dependencies...")
 set_directory_properties(PROPERTIES EXCLUDE_FROM_ALL TRUE)
 set(CMAKE_SKIP_INSTALL_RULES ON CACHE BOOL "" FORCE)
@@ -20,7 +22,10 @@ add_code_coverage_all_targets()
 
 add_library(glz_test_common INTERFACE)
 target_compile_features(glz_test_common INTERFACE cxx_std_23)
-target_link_libraries(glz_test_common INTERFACE ut::ut glaze::glaze glz_asio)
+target_link_libraries(glz_test_common INTERFACE ut::ut glaze::glaze)
+if (BUILD_NETWORKING_TEST)
+target_link_libraries(glz_test_common glz_asio)
+endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(glz_test_common INTERFACE -fno-exceptions -fno-rtti)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
@@ -76,6 +81,8 @@ add_subdirectory(stencil)
 add_subdirectory(threading_test)
 add_subdirectory(toml_test)
 add_subdirectory(utility_formats)
+add_subdirectory(yaml_test)
+
 
 # JSON Tests
 add_subdirectory(json_conformance)
@@ -83,7 +90,9 @@ add_subdirectory(json_performance)
 add_subdirectory(json_reflection_test)
 add_subdirectory(json_test)
 
-add_subdirectory(networking_tests)
+if (BUILD_NETWORKING_TEST)
+    add_subdirectory(networking_tests)
+endif()
 
 if(glaze_EETF_FORMAT)
     add_subdirectory(eetf_test)

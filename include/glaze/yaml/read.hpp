@@ -12,10 +12,10 @@
 #include "glaze/core/read.hpp"
 #include "glaze/core/reflect.hpp"
 #include "glaze/file/file_ops.hpp"
-#include "glaze/yaml/opts.hpp"
 #include "glaze/util/glaze_fast_float.hpp"
 #include "glaze/util/parse.hpp"
 #include "glaze/util/type_traits.hpp"
+#include "glaze/yaml/opts.hpp"
 
 namespace glz
 {
@@ -32,13 +32,10 @@ namespace glz
 
    // Skip whitespace and comments
    template <class It, class End>
-   GLZ_ALWAYS_INLINE void skip_ws_and_comments(It&& it, End&& end) noexcept
+   GLZ_ALWAYS_INLINE void skip_comments(It&& it, End&& end) noexcept
    {
       while (it != end) {
-         if (*it == ' ' || *it == '\t') {
-            ++it;
-         }
-         else if (*it == '#') {
+         if (*it == '#') {
             // Skip comment to end of line
             while (it != end && *it != '\n' && *it != '\r') {
                ++it;
@@ -148,10 +145,9 @@ namespace glz
    }
 
    template <class Ctx, class It, class End>
-   GLZ_ALWAYS_INLINE bool parse_toml_key(std::vector<std::string>& keys, Ctx& ctx, It& it, End end) noexcept
+   GLZ_ALWAYS_INLINE bool parse_yaml_key(std::vector<std::string>& keys, Ctx& ctx, It& it, End end) noexcept
    {
       keys.clear();
-      skip_ws_and_comments(it, end);
 
       if (it == end) {
          ctx.error = error_code::unexpected_end;
@@ -824,6 +820,121 @@ namespace glz
       }
    }
 
+   enum class token_type { key, value, sequence_item, end_of_line, end_of_file };
+
+   struct token
+   {
+      token_type type;
+      std::string_view text;
+      std::size_t indent = 0;
+   };
+
+   template <class It>
+   inline std::optional<token> next_token(It& it, const It& end)
+   {
+      // Skip empty lines and comments
+      while (it != end) {
+         // Skip carriage returns
+         if (*it == '\r') {
+            ++it;
+            continue;
+         }
+
+         // Skip full-line comments
+         if (*it == '#') {
+            while (it != end && *it != '\n') ++it;
+            if (it != end) ++it; // consume '\n'
+            continue;
+         }
+
+         // Skip newlines (emit end_of_line)
+         if (*it == '\n') {
+            ++it;
+            return token{token_type::end_of_line, {}, 0};
+         }
+
+         // Non-empty line starts here
+         break;
+      }
+
+      if (it == end) return token{token_type::end_of_file, {}, 0};
+
+      // Count indentation (spaces only)
+      std::size_t indent = 0;
+      auto line_start = it;
+      while (it != end && *it == ' ') {
+         ++indent;
+         ++it;
+      }
+
+      if (it == end) return token{token_type::end_of_file, {}, indent};
+
+      // Detect sequence item ("- value")
+      if (*it == '-') {
+         auto dash = it;
+         ++it;
+
+         // Check next char is space or EOL
+         if (it != end && std::isspace(static_cast<unsigned char>(*it))) {
+            // Skip single space after '-'
+            if (*it == ' ') ++it;
+
+            // Capture scalar value (until comment or EOL)
+            auto val_start = it;
+            while (it != end && *it != '\n' && *it != '#') ++it;
+            auto val_end = it;
+
+            std::string_view text(&*val_start, std::distance(val_start, val_end));
+            return token{token_type::sequence_item, text, indent};
+         }
+         else {
+            // Not a valid list item, treat as value literal "-"
+            std::string_view text(&*dash, 1);
+            return token{token_type::value, text, indent};
+         }
+      }
+
+      // Otherwise, read key or scalar
+      auto start = it;
+      while (it != end && *it != ':' && *it != '\n' && *it != '#') ++it;
+
+      if (it == end) {
+         std::string_view text(&*start, std::distance(start, it));
+         return token{token_type::value, text, indent};
+      }
+
+      if (*it == ':') {
+         auto colon = it;
+         ++it; // consume ':'
+
+         // optional space
+         if (it != end && *it == ' ') ++it;
+
+         // Capture value (if any on same line)
+         auto val_start = it;
+         while (it != end && *it != '\n' && *it != '#') ++it;
+         auto val_end = it;
+
+         std::string_view key(&*start, std::distance(start, colon));
+         std::string_view value(&*val_start, std::distance(val_start, val_end));
+
+         // Return key first (value will be read next iteration if empty)
+         if (!value.empty()) {
+            // Inline key:value
+            return token{token_type::key, key, indent};
+         }
+         else {
+            // Key with value on next line
+            return token{token_type::key, key, indent};
+         }
+      }
+
+      // Otherwise, it's a bare scalar (value)
+      auto val_end = it;
+      std::string_view text(&*start, std::distance(start, val_end));
+      return token{token_type::value, text, indent};
+   }
+
    template <class T>
       requires((glaze_object_t<T> || reflectable<T>) && not custom_read<T>)
    struct from<YAML, T>
@@ -832,84 +943,6 @@ namespace glz
       static void op(auto&& value, is_context auto&& ctx, It&& it, auto&& end)
       {
          while (it != end) {
-            // TODO: Introduce OPTS here
-            skip_ws_and_comments(it, end);
-            if (it == end) { // Empty input for an object is valid (empty object)
-               return;
-            }
-            if (*it == '\n' || *it == '\r') {
-               skip_to_next_line(ctx, it, end);
-               continue;
-            }
-
-            // TODO: We probably should reorder that so that we dont check against less used inline table more often
-            if (*it == '{') { // Check if it's an inline table
-               ++it; // Consume '{'
-               skip_ws_and_comments(it, end);
-               if (it != end && *it == '}') { // Empty inline table {}
-                  ++it;
-                  return;
-               }
-               // TODO: Rewrite logic here, for now it works just fine so we leave it.
-               detail::parse_toml_object_members<Opts>(value, it, end, ctx, true); // true for is_inline_table
-               // The parse_toml_object_members should consume the final '}' if successful
-            }
-            else if (*it == '[') { // Normal table
-               std::vector<std::string> path;
-
-               if constexpr (toml::check_is_internal(Opts)) {
-                  return; // is it's internal we return to root.
-               }
-               else {
-                  ++it;
-                  if (*it == '[') { // Array of tables
-
-                     ++it; // skip the second bracket
-                     ctx.error = error_code::feature_not_supported;
-                     return;
-                     // TODO: the logic should ideally branch here, because arrays should ignore multiple defenition
-                     // errors And should also use push back version but for now we just error out, will support
-                     // later
-                  }
-                  skip_ws_and_comments(it, end);
-
-                  if (!parse_toml_key(path, ctx, it, end)) {
-                     return;
-                  }
-                  if (it == end || *it != ']') {
-                     ctx.error = error_code::syntax_error;
-                     return;
-                  }
-                  it++; // skip ']'
-                  if (!resolve_nested<Opts>(value, std::span{path}, ctx, it, end)) {
-                     return;
-                  }
-               }
-            }
-            else {
-               std::vector<std::string> path;
-               skip_ws_and_comments(it, end);
-
-               if (!parse_toml_key(path, ctx, it, end)) {
-                  return;
-               }
-
-               if (it == end || *it != '=') {
-                  ctx.error = error_code::syntax_error;
-                  return;
-               }
-
-               ++it; // Skip '='
-               skip_ws_and_comments(it, end);
-
-               if (it == end) {
-                  ctx.error = error_code::unexpected_end; // Value expected
-                  return;
-               }
-               if (!resolve_nested<Opts>(value, std::span{path}, ctx, it, end)) {
-                  return;
-               }
-            }
          }
       }
    };
