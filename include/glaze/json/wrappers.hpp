@@ -88,7 +88,7 @@ namespace glz
                return std::string_view{value.val};
             }
          }();
-         to<JSON, std::string_view>::template op<opt_true<Opts, escape_control_characters_opt_tag{}>>(sv, ctx, b, ix);
+         to<JSON, std::string_view>::template op<opt_true<Opts, &escape_control_characters_opt>>(sv, ctx, b, ix);
       }
    };
 

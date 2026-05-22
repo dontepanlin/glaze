@@ -31,7 +31,7 @@ namespace glz
       template <auto Opts>
       GLZ_ALWAYS_INLINE static void op(auto&& value, auto&&... args)
       {
-         parse<JSON>::op<opt_true<Opts, raw_string_opt_tag{}>>(value.val, args...);
+         parse<JSON>::op<opt_true<Opts, &raw_string_opt>>(value.val, args...);
       }
    };
 
@@ -42,7 +42,7 @@ namespace glz
       GLZ_ALWAYS_INLINE static void op(auto&& value, is_context auto&& ctx, auto&&... args)
       {
          using val_t = std::remove_cvref_t<decltype(value.val)>;
-         to<JSON, val_t>::template op<opt_true<Opts, raw_string_opt_tag{}>>(value.val, ctx, args...);
+         to<JSON, val_t>::template op<opt_true<Opts, &raw_string_opt>>(value.val, ctx, args...);
       }
    };
 
@@ -52,7 +52,7 @@ namespace glz
       template <auto Opts>
       GLZ_ALWAYS_INLINE static void op(auto&& value, auto&&... args)
       {
-         parse<JSON>::op<opt_false<Opts, raw_string_opt_tag{}>>(value.val, args...);
+         parse<JSON>::op<opt_false<Opts, &raw_string_opt>>(value.val, args...);
       }
    };
 
@@ -63,7 +63,7 @@ namespace glz
       GLZ_ALWAYS_INLINE static void op(auto&& value, is_context auto&& ctx, auto&&... args)
       {
          using val_t = std::remove_cvref_t<decltype(value.val)>;
-         to<JSON, val_t>::template op<opt_false<Opts, raw_string_opt_tag{}>>(value.val, ctx, args...);
+         to<JSON, val_t>::template op<opt_false<Opts, &raw_string_opt>>(value.val, ctx, args...);
       }
    };
 

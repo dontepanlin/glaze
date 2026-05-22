@@ -3350,10 +3350,10 @@ namespace glz
                      }
                      else if constexpr (std::is_arithmetic_v<Key>) {
                         // prefer over quoted_t below to avoid double parsing of quoted_t
-                        parse<JSON>::op<opt_true<Opts, quoted_num_opt_tag{}>>(key_value, ctx, it, end);
+                        parse<JSON>::op<opt_true<Opts, &quoted_num_opt>>(key_value, ctx, it, end);
                      }
                      else {
-                        parse<JSON>::op<opt_false<Opts, raw_string_opt_tag{}>>(quoted_t<Key>{key_value}, ctx, it, end);
+                        parse<JSON>::op<opt_false<Opts, &raw_string_opt>>(quoted_t<Key>{key_value}, ctx, it, end);
                      }
                      if (bool(ctx.error)) [[unlikely]]
                         return;

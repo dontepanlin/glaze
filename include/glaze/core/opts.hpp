@@ -285,27 +285,35 @@ namespace glz
 
    struct append_arrays_opt_tag
    {};
+   inline constexpr append_arrays_opt_tag append_arrays_opt{};
 
    struct bools_as_numbers_opt_tag
    {};
+   inline constexpr bools_as_numbers_opt_tag bools_as_numbers_opt{};
 
    struct escape_control_characters_opt_tag
    {};
+   inline constexpr escape_control_characters_opt_tag escape_control_characters_opt{};
 
    struct quoted_num_opt_tag
    {};
+   inline constexpr quoted_num_opt_tag quoted_num_opt{};
 
    struct string_as_number_opt_tag
    {};
+   inline constexpr string_as_number_opt_tag string_as_number_opt{};
 
    struct unquoted_opt_tag
    {};
+   inline constexpr unquoted_opt_tag unquoted_opt{};
 
    struct raw_string_opt_tag
    {};
+   inline constexpr raw_string_opt_tag raw_string_opt{};
 
    struct structs_as_arrays_opt_tag
    {};
+   inline constexpr structs_as_arrays_opt_tag structs_as_arrays_opt{};
 
    // Helper for deprecated option static_asserts (dependent false pattern)
    template <class>
@@ -314,29 +322,29 @@ namespace glz
    inline constexpr bool deprecated_opts_number = false;
 
    template <auto member_ptr>
-   concept is_append_arrays_tag = std::same_as<std::decay_t<decltype(member_ptr)>, append_arrays_opt_tag>;
+   concept is_append_arrays_tag = std::same_as<std::decay_t<decltype(member_ptr)>, const append_arrays_opt_tag*>;
 
    template <auto member_ptr>
-   concept is_bools_as_numbers_tag = std::same_as<std::decay_t<decltype(member_ptr)>, bools_as_numbers_opt_tag>;
+   concept is_bools_as_numbers_tag = std::same_as<std::decay_t<decltype(member_ptr)>, const bools_as_numbers_opt_tag*>;
 
    template <auto member_ptr>
    concept is_escape_control_characters_tag =
-      std::same_as<std::decay_t<decltype(member_ptr)>, escape_control_characters_opt_tag>;
+      std::same_as<std::decay_t<decltype(member_ptr)>, const escape_control_characters_opt_tag*>;
 
    template <auto member_ptr>
-   concept is_quoted_num_tag = std::same_as<std::decay_t<decltype(member_ptr)>, quoted_num_opt_tag>;
+   concept is_quoted_num_tag = std::same_as<std::decay_t<decltype(member_ptr)>, const quoted_num_opt_tag*>;
 
    template <auto member_ptr>
-   concept is_string_as_number_tag = std::same_as<std::decay_t<decltype(member_ptr)>, string_as_number_opt_tag>;
+   concept is_string_as_number_tag = std::same_as<std::decay_t<decltype(member_ptr)>, const string_as_number_opt_tag*>;
 
    template <auto member_ptr>
-   concept is_unquoted_tag = std::same_as<std::decay_t<decltype(member_ptr)>, unquoted_opt_tag>;
+   concept is_unquoted_tag = std::same_as<std::decay_t<decltype(member_ptr)>, const unquoted_opt_tag*>;
 
    template <auto member_ptr>
-   concept is_raw_string_tag = std::same_as<std::decay_t<decltype(member_ptr)>, raw_string_opt_tag>;
+   concept is_raw_string_tag = std::same_as<std::decay_t<decltype(member_ptr)>, const raw_string_opt_tag*>;
 
    template <auto member_ptr>
-   concept is_structs_as_arrays_tag = std::same_as<std::decay_t<decltype(member_ptr)>, structs_as_arrays_opt_tag>;
+   concept is_structs_as_arrays_tag = std::same_as<std::decay_t<decltype(member_ptr)>, const structs_as_arrays_opt_tag*>;
 
    consteval bool check_validate_skipped(auto&& Opts)
    {

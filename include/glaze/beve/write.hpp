@@ -1656,20 +1656,20 @@ namespace glz
    template <write_supported<BEVE> T, class Buffer>
    [[nodiscard]] error_ctx write_beve_untagged(T&& value, Buffer&& buffer)
    {
-      return write<opt_true<opts{.format = BEVE}, structs_as_arrays_opt_tag{}>>(std::forward<T>(value),
+      return write<opt_true<opts{.format = BEVE}, &structs_as_arrays_opt>>(std::forward<T>(value),
                                                                                 std::forward<Buffer>(buffer));
    }
 
    template <write_supported<BEVE> T>
    [[nodiscard]] glz::expected<std::string, error_ctx> write_beve_untagged(T&& value)
    {
-      return write<opt_true<opts{.format = BEVE}, structs_as_arrays_opt_tag{}>>(std::forward<T>(value));
+      return write<opt_true<opts{.format = BEVE}, &structs_as_arrays_opt>>(std::forward<T>(value));
    }
 
    template <auto Opts = opts{}, write_supported<BEVE> T>
    [[nodiscard]] error_ctx write_file_beve_untagged(T&& value, const std::string& file_name, auto&& buffer)
    {
-      return write_file_beve<opt_true<Opts, structs_as_arrays_opt_tag{}>>(std::forward<T>(value), file_name, buffer);
+      return write_file_beve<opt_true<Opts, &structs_as_arrays_opt>>(std::forward<T>(value), file_name, buffer);
    }
 
    // ===== Delimited BEVE support for multiple objects in one buffer =====

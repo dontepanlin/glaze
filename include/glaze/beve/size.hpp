@@ -839,6 +839,6 @@ namespace glz
    [[nodiscard]] size_t beve_size_untagged(T&& value)
    {
       return calculate_size<BEVE, std::remove_cvref_t<T>>::template op<
-         opt_true<set_beve<Opts>(), structs_as_arrays_opt_tag{}>>(std::forward<T>(value));
+         opt_true<set_beve<Opts>(), &structs_as_arrays_opt>>(std::forward<T>(value));
    }
 }

@@ -1203,10 +1203,10 @@ namespace glz
          to<JSON, core_t<Key>>::template op<Opts>(key, ctx, b, ix);
       }
       else if constexpr (num_t<Key>) {
-         serialize<JSON>::op<opt_true<Opts, quoted_num_opt_tag{}>>(key, ctx, b, ix);
+         serialize<JSON>::op<opt_true<Opts, &quoted_num_opt>>(key, ctx, b, ix);
       }
       else {
-         serialize<JSON>::op<opt_false<Opts, raw_string_opt_tag{}>>(quoted_t<const Key>{key}, ctx, b, ix);
+         serialize<JSON>::op<opt_false<Opts, &raw_string_opt>>(quoted_t<const Key>{key}, ctx, b, ix);
       }
       if (bool(ctx.error)) [[unlikely]] {
          return;

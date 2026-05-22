@@ -68,33 +68,33 @@ namespace glz
 
    // When reading into an array that is appendable, the new data will be appended rather than overwrite
    template <auto MemPtr>
-   constexpr auto append_arrays = opts_wrapper<MemPtr, append_arrays_opt_tag{}>();
+   constexpr auto append_arrays = opts_wrapper<MemPtr, &append_arrays_opt>();
 
    // Read and write booleans as numbers
    template <auto MemPtr>
-   constexpr auto bools_as_numbers = opts_wrapper<MemPtr, bools_as_numbers_opt_tag{}>();
+   constexpr auto bools_as_numbers = opts_wrapper<MemPtr, &bools_as_numbers_opt>();
 
    // Read and write numbers as strings
    template <auto MemPtr>
-   constexpr auto quoted_num = opts_wrapper<MemPtr, quoted_num_opt_tag{}>();
+   constexpr auto quoted_num = opts_wrapper<MemPtr, &quoted_num_opt>();
 
    // Treat types like std::string as numbers: read and write them without quotes
    template <auto MemPtr>
-   constexpr auto string_as_number = opts_wrapper<MemPtr, string_as_number_opt_tag{}>();
+   constexpr auto string_as_number = opts_wrapper<MemPtr, &string_as_number_opt>();
 
    // Deprecated: use string_as_number instead
    template <auto MemPtr>
    [[deprecated("Use glz::string_as_number instead of glz::number")]]
-   constexpr auto number = opts_wrapper<MemPtr, string_as_number_opt_tag{}>();
+   constexpr auto number = opts_wrapper<MemPtr, &string_as_number_opt>();
 
    // Write out string like types without quotes
    template <auto MemPtr>
-   constexpr auto unquoted = opts_wrapper<MemPtr, unquoted_opt_tag{}>();
+   constexpr auto unquoted = opts_wrapper<MemPtr, &unquoted_opt>();
 
    // Deprecated: use unquoted instead
    template <auto MemPtr>
    [[deprecated("Use glz::unquoted instead of glz::raw")]]
-   constexpr auto raw = opts_wrapper<MemPtr, unquoted_opt_tag{}>();
+   constexpr auto raw = opts_wrapper<MemPtr, &unquoted_opt>();
 
    // Reads into only existing fields and elements and then exits without parsing the rest of the input
    template <auto MemPtr>

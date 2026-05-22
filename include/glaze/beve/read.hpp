@@ -2216,7 +2216,7 @@ namespace glz
    [[deprecated("Use read_beve_untagged instead")]] [[nodiscard]] inline error_ctx read_binary_untagged(T&& value,
                                                                                                         Buffer&& buffer)
    {
-      return read<opt_true<opts{.format = BEVE}, structs_as_arrays_opt_tag{}>>(std::forward<T>(value),
+      return read<opt_true<opts{.format = BEVE}, &structs_as_arrays_opt>>(std::forward<T>(value),
                                                                                std::forward<Buffer>(buffer));
    }
 
@@ -2226,7 +2226,7 @@ namespace glz
    {
       T value{};
       const auto pe =
-         read<opt_true<opts{.format = BEVE}, structs_as_arrays_opt_tag{}>>(value, std::forward<Buffer>(buffer));
+         read<opt_true<opts{.format = BEVE}, &structs_as_arrays_opt>>(value, std::forward<Buffer>(buffer));
       if (pe) [[unlikely]] {
          return unexpected(pe);
       }
@@ -2237,7 +2237,7 @@ namespace glz
    template <read_supported<BEVE> T, class Buffer>
    [[nodiscard]] inline error_ctx read_beve_untagged(T&& value, Buffer&& buffer)
    {
-      return read<opt_true<opts{.format = BEVE}, structs_as_arrays_opt_tag{}>>(std::forward<T>(value),
+      return read<opt_true<opts{.format = BEVE}, &structs_as_arrays_opt>>(std::forward<T>(value),
                                                                                std::forward<Buffer>(buffer));
    }
 
@@ -2246,7 +2246,7 @@ namespace glz
    {
       T value{};
       const auto pe =
-         read<opt_true<opts{.format = BEVE}, structs_as_arrays_opt_tag{}>>(value, std::forward<Buffer>(buffer));
+         read<opt_true<opts{.format = BEVE}, &structs_as_arrays_opt>>(value, std::forward<Buffer>(buffer));
       if (pe) [[unlikely]] {
          return unexpected(pe);
       }
@@ -2256,7 +2256,7 @@ namespace glz
    template <auto Opts = opts{}, read_supported<BEVE> T>
    [[nodiscard]] inline error_ctx read_file_beve_untagged(T& value, const std::string& file_name, auto&& buffer)
    {
-      return read_file_beve<opt_true<Opts, structs_as_arrays_opt_tag{}>>(value, file_name, buffer);
+      return read_file_beve<opt_true<Opts, &structs_as_arrays_opt>>(value, file_name, buffer);
    }
 
    // ===== Delimited BEVE support for multiple objects in one buffer =====
