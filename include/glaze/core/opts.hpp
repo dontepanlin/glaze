@@ -344,7 +344,8 @@ namespace glz
    concept is_raw_string_tag = std::same_as<std::decay_t<decltype(member_ptr)>, const raw_string_opt_tag*>;
 
    template <auto member_ptr>
-   concept is_structs_as_arrays_tag = std::same_as<std::decay_t<decltype(member_ptr)>, const structs_as_arrays_opt_tag*>;
+   concept is_structs_as_arrays_tag =
+      std::same_as<std::decay_t<decltype(member_ptr)>, const structs_as_arrays_opt_tag*>;
 
    consteval bool check_validate_skipped(auto&& Opts)
    {
